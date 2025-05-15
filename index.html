@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>三星產品考題產生器 (v4.1 - 更新機型列表)</title>
+    <title>三星產品考題產生器 (v4.3 - 精簡資料)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
@@ -56,36 +56,22 @@
             .container {
                 padding: 1rem; /* 手機視圖時調整內邊距 */
             }
-            .input-group {
-                flex-direction: column;
-                gap: 0.5rem;
-            }
-            .input-group > * {
-                width: 100%;
-            }
         }
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen flex items-center justify-center py-8">
-    <div class="container mx-auto max-w-5xl bg-white p-6 sm:p-8 rounded-lg shadow-xl"> {/* 頁面寬度調整為 max-w-5xl */}
+    <div class="container mx-auto max-w-5xl bg-white p-6 sm:p-8 rounded-lg shadow-xl">
         <header class="text-center mb-6">
             <h1 class="text-3xl font-bold text-blue-600">三星產品考題產生器</h1>
-            <p class="text-gray-600 mt-2">選擇產品機型與規格類別，從(模擬的)網路資料產生考題。</p>
+            <p class="text-gray-600 mt-2">選擇產品機型，隨機產生相關規格填空題。</p>
         </header>
 
-        <div class="input-group space-y-4 sm:space-y-0 sm:flex sm:space-x-4 mb-6">
-            <div class="flex-grow">
-                <label for="modelNameSelect" class="block text-sm font-medium text-gray-700 mb-1">產品機型:</label>
-                <select id="modelNameSelect" name="modelNameSelect"
-                        class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                    </select>
-            </div>
-            <div class="flex-grow">
-                <label for="dataSourceSelect" class="block text-sm font-medium text-gray-700 mb-1">選擇規格類別:</label>
-                <select id="dataSourceSelect" name="dataSourceSelect"
-                        class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                    </select>
-            </div>
+        <div class="mb-6">
+            <label for="modelNameSelect" class="block text-sm font-medium text-gray-700 mb-1">產品機型:</label>
+            <select id="modelNameSelect" name="modelNameSelect"
+                    class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                {/* 機型選項將由 JavaScript 填充 */}
+            </select>
         </div>
 
         <button id="generateButton" class="btn btn-primary w-full sm:w-auto mb-6">
@@ -93,7 +79,6 @@
         </button>
 
         <div id="quizArea" class="mt-8">
-            {/* 考題將顯示於此 */}
         </div>
 
         <div id="submitArea" class="mt-6 hidden">
@@ -101,38 +86,29 @@
         </div>
 
         <div id="scoreArea" class="mt-8">
-            {/* 分數將顯示於此 */}
         </div>
 
          <div id="noResultsMessage" class="mt-6 text-center text-gray-500 hidden">
-            <p>找不到符合條件的題目，請嘗試其他機型或資料類別。</p>
+            <p>找不到符合條件的題目，請嘗試其他機型。</p>
         </div>
     </div>
 
     <script>
         // --- 預定義產品機型列表 (依照使用者最新指定) ---
         const productModels = [
-            // S Series
             "Galaxy S25 Ultra", "Galaxy S25+", "Galaxy S25", "Galaxy S25 Edge",
             "Galaxy S24 Ultra", "Galaxy S24+", "Galaxy S24",
-            // Z Series
             "Galaxy Z Fold6", "Galaxy Z Flip6",
-            // A Series (Future Models)
             "Galaxy A56", "Galaxy A36", "Galaxy A26",
-            // Tab S Series (Future Models)
             "Galaxy Tab S10 Ultra", "Galaxy Tab S10+", "Galaxy Tab S10", "Galaxy Tab S10 FE",
-            // Watch Series (Future Models)
             "Galaxy Watch7", "Galaxy Watch Ultra",
-            // Buds Series (Future Models)
             "Galaxy Buds3 Pro", "Galaxy Buds3"
-            // 舊機型已移除
         ];
 
         // --- 模擬從網路搜尋到的產品規格資料 ---
         // !!! 注意：未來機型的規格與價格主要基於市場傳聞與預測，僅供參考 !!!
-        // 此處保留先前已填充的資料，未列於上方 productModels 的機型將無法透過下拉選單選到
-        const fetchedProductSpecs = {
-            // S25 Series (預期/傳聞規格與價格)
+        // fetchedProductSpecs 物件現在只會包含 productModels 中列出的機型資料
+        const allFetchedProductSpecs = { // 完整資料庫，用於篩選
             "galaxy s25 ultra": {
                 "處理器型號": "Snapdragon 8 Gen 4 for Galaxy (預期)", "處理器核心數": "8核心 (預期)", "RAM": "12GB/16GB (預期)", "儲存空間": "256GB/512GB/1TB (預期)",
                 "主螢幕尺寸": "6.9吋 (預期)", "主螢幕解析度": "QHD+ (預期)", "主螢幕技術": "Dynamic AMOLED 3X (預期)", "主螢幕最高更新頻率": "1-144Hz (預期)",
@@ -285,155 +261,38 @@
                 "防水防塵等級": "IP57 (預期)", "特色功能": "全新設計 (豆芽式傳聞), AI通話降噪 (預期)", "作業系統": "N/A",
                 "建議售價": "NT$4,990 (預期)"
             },
-            // --- 以下為先前已部分填充的機型，此處主要補充價格或確認核心規格 ---
-            "galaxy s23 ultra": {
-                "處理器型號": "Qualcomm Snapdragon 8 Gen 2 for Galaxy", "處理器核心數": "8核心", "RAM": "8GB/12GB",
-                "主螢幕尺寸": "6.8吋", "主螢幕解析度": "3088x1440 pixels (QHD+)", "主螢幕技術": "Dynamic AMOLED 2X", "主螢幕最高更新頻率": "120Hz",
-                "主相機最高畫素": "2億畫素", "望遠鏡頭1畫素及光學變焦": "1000萬畫素 (3倍光學變焦)", "望遠鏡頭2畫素及光學變焦": "1000萬畫素 (10倍光學變焦)", "超廣角鏡頭畫素": "1200萬畫素", "前鏡頭畫素": "1200萬畫素", "錄影最高解析度": "8K (30fps)",
-                "電池容量": "5000mAh", "有線快速充電瓦數": "支援45W", "無線充電": "支援",
-                "防水防塵等級": "IP68", "內建 S Pen": "是", "NFC功能": "支援", "作業系統": "Android 13 (可升級)",
-                "建議售價": "NT$40,900 起 (12G/256G 上市價)"
-            },
-            "galaxy s23 fe": {
-                "處理器型號": "Snapdragon 8 Gen 1 / Exynos 2200", "處理器核心數": "8核心", "RAM": "8GB",
-                "主螢幕尺寸": "6.4吋", "主螢幕解析度": "2340x1080 pixels (FHD+)", "主螢幕技術": "Dynamic AMOLED 2X", "主螢幕最高更新頻率": "120Hz",
-                "主相機最高畫素": "5000萬畫素", "望遠鏡頭1畫素及光學變焦": "800萬畫素 (3倍光學變焦)", "超廣角鏡頭畫素": "1200萬畫素", "前鏡頭畫素": "1000萬畫素", "錄影最高解析度": "8K (24fps)",
-                "電池容量": "4500mAh", "有線快速充電瓦數": "支援25W", "無線充電": "支援",
-                "防水防塵等級": "IP68", "NFC功能": "支援", "作業系統": "Android 13 (可升級)",
-                "建議售價": "NT$19,490 起 (8G/128G 上市價)"
-            },
-            "galaxy z fold5": {
-                "處理器型號": "Snapdragon 8 Gen 2 for Galaxy", "處理器核心數": "8核心", "RAM": "12GB",
-                "內頁螢幕尺寸": "7.6吋", "封面螢幕尺寸": "6.2吋", "主螢幕技術": "Dynamic AMOLED 2X", "主螢幕最高更新頻率": "120Hz",
-                "主相機最高畫素": "5000萬畫素", "望遠鏡頭1畫素及光學變焦": "1000萬畫素 (3倍光學變焦)", "超廣角鏡頭畫素": "1200萬畫素",
-                "前鏡頭畫素": "400萬畫素 (螢幕下)", "封面螢幕前鏡頭畫素": "1000萬畫素",
-                "電池容量": "4400mAh", "有線快速充電瓦數": "支援25W", "無線充電": "支援",
-                "防水防塵等級": "IPX8", "內建 S Pen": "支援 (需另購特定版本)", "NFC功能": "支援", "作業系統": "Android 13 (可升級)",
-                "建議售價": "NT$56,888 起 (12G/256G 上市價)"
-            },
-            "galaxy z flip5": {
-                "處理器型號": "Snapdragon 8 Gen 2 for Galaxy", "處理器核心數": "8核心", "RAM": "8GB",
-                "主螢幕尺寸": "6.7吋", "封面螢幕尺寸": "3.4吋", "主螢幕技術": "Dynamic AMOLED 2X", "主螢幕最高更新頻率": "120Hz",
-                "主相機最高畫素": "1200萬畫素", "超廣角鏡頭畫素": "1200萬畫素", "前鏡頭畫素": "1000萬畫素",
-                "電池容量": "3700mAh", "有線快速充電瓦數": "支援25W", "無線充電": "支援",
-                "防水防塵等級": "IPX8", "NFC功能": "支援", "作業系統": "Android 13 (可升級)",
-                "建議售價": "NT$32,888 起 (8G/256G 上市價)"
-            },
-            "galaxy a55 5g": {
-                "處理器型號": "Exynos 1480", "處理器核心數": "8核心", "RAM": "8GB",
-                "主螢幕尺寸": "6.6吋", "主螢幕解析度": "1080x2340 pixels (FHD+)", "主螢幕技術": "Super AMOLED", "主螢幕最高更新頻率": "120Hz",
-                "主相機最高畫素": "5000萬畫素 (OIS)", "超廣角鏡頭畫素": "1200萬畫素", "微距鏡頭畫素": "500萬畫素", "前鏡頭畫素": "3200萬畫素", "錄影最高解析度": "4K (30fps)",
-                "電池容量": "5000mAh", "有線快速充電瓦數": "支援25W", "無線充電": "不支援",
-                "防水防塵等級": "IP67", "NFC功能": "支援", "作業系統": "Android 14",
-                "建議售價": "NT$14,990 起 (8G/128G 上市價)"
-            },
-            "galaxy a35 5g": {
-                "處理器型號": "Exynos 1380", "處理器核心數": "8核心", "RAM": "6GB/8GB",
-                "主螢幕尺寸": "6.6吋", "主螢幕解析度": "1080x2340 pixels (FHD+)", "主螢幕技術": "Super AMOLED", "主螢幕最高更新頻率": "120Hz",
-                "主相機最高畫素": "5000萬畫素 (OIS)", "超廣角鏡頭畫素": "800萬畫素", "微距鏡頭畫素": "500萬畫素", "前鏡頭畫素": "1300萬畫素", "錄影最高解析度": "4K (30fps)",
-                "電池容量": "5000mAh", "有線快速充電瓦數": "支援25W", "無線充電": "不支援",
-                "防水防塵等級": "IP67", "NFC功能": "支援", "作業系統": "Android 14",
-                "建議售價": "NT$11,990 起 (6G/128G 上市價)"
-            },
-            "galaxy tab s9 ultra": {
-                "處理器型號": "Qualcomm Snapdragon 8 Gen 2 for Galaxy", "處理器核心數": "8核心", "RAM": "12GB/16GB",
-                "主螢幕尺寸": "14.6吋", "主螢幕解析度": "2960x1848 pixels", "主螢幕技術": "Dynamic AMOLED 2X", "主螢幕最高更新頻率": "120Hz",
-                "主相機最高畫素": "1300萬畫素", "超廣角鏡頭畫素": "800萬畫素", "前鏡頭畫素":"1200萬畫素 + 1200萬畫素超廣角", "錄影最高解析度": "4K (30/60fps)",
-                "電池容量": "11200mAh", "有線快速充電瓦數": "支援45W", "無線充電": "不支援",
-                "防水防塵等級": "IP68", "內建 S Pen": "是 (隨附)", "NFC功能": "不支援", "作業系統": "Android 13 (可升級)",
-                "建議售價": "NT$39,990 起 (Wi-Fi, 12G/256G 上市價)"
-            },
-            "galaxy tab s9": {
-                "處理器型號": "Qualcomm Snapdragon 8 Gen 2 for Galaxy", "處理器核心數": "8核心", "RAM": "8GB/12GB",
-                "主螢幕尺寸": "11吋", "主螢幕解析度": "2560x1600 pixels (WQXGA)", "主螢幕技術": "Dynamic AMOLED 2X", "主螢幕最高更新頻率": "120Hz",
-                "主相機最高畫素": "1300萬畫素", "前鏡頭畫素": "1200萬畫素 (超廣角)", "錄影最高解析度": "4K (30fps)",
-                "電池容量": "8400mAh", "有線快速充電瓦數": "支援45W", "無線充電": "不支援",
-                "防水防塵等級": "IP68", "內建 S Pen": "是 (隨附)", "NFC功能": "不支援", "作業系統": "Android 13 (可升級)",
-                "建議售價": "NT$23,990 起 (Wi-Fi, 8G/128G 上市價)"
-            },
-            "galaxy watch6": {
-                "處理器型號": "Exynos W930 (雙核心 1.4GHz)", "RAM": "2GB", "儲存空間": "16GB",
-                "主螢幕尺寸": "1.5吋 (44mm) / 1.3吋 (40mm)", "主螢幕解析度": "480x480 pixels (44mm) / 432x432 pixels (40mm)", "主螢幕技術": "Super AMOLED",
-                "電池容量": "425mAh (44mm) / 300mAh (40mm)", "無線充電": "支援 (WPC無線充電)",
-                "防水防塵等級": "5ATM + IP68", "NFC功能": "支援", "作業系統": "Wear OS Powered by Samsung",
-                "健康感測器": "心率偵測, ECG, 血氧飽和度, 睡眠追蹤, BIA身體組成分析, 體溫感測", "錶殼材質": "鋁合金",
-                "建議售價": "NT$9,990 起 (40mm BT版上市價)"
-            },
-             "galaxy watch6 classic": { // Watch6 Classic 的資料
-                "處理器型號": "Exynos W930 (雙核心 1.4GHz)", "RAM": "2GB", "儲存空間": "16GB",
-                "主螢幕尺寸": "1.5吋 (47mm) / 1.3吋 (43mm)", "主螢幕解析度": "480x480 pixels (47mm) / 432x432 pixels (43mm)", "主螢幕技術": "Super AMOLED", "特色功能": "實體旋轉錶圈",
-                "電池容量": "425mAh (47mm) / 300mAh (43mm)", "無線充電": "支援 (WPC無線充電)",
-                "防水防塵等級": "5ATM + IP68", "NFC功能": "支援", "作業系統": "Wear OS Powered by Samsung",
-                "健康感測器": "心率偵測, ECG, 血氧飽和度, 睡眠追蹤, BIA身體組成分析, 體溫感測", "錶殼材質": "不鏽鋼",
-                "建議售價": "NT$12,990 起 (43mm BT版上市價)"
-            },
-            "galaxy buds fe": {
-                "藍牙版本": "5.2", "主動式降噪": "支援", "單耳續航(ANC開)": "約6小時", "總續航(ANC開)": "約21小時",
-                "防水防塵等級": "IPX2 (僅耳機)", "特色功能": "舒適耳翼設計", "作業系統": "N/A",
-                "建議售價": "NT$2,990 (上市價)"
-            },
-            "galaxy buds2 pro": {
-                "藍牙版本": "5.3", "主動式降噪": "智慧主動式降噪", "單耳續航(ANC開)": "約5小時", "總續航(ANC開)": "約18小時",
-                "防水防塵等級": "IPX7", "特色功能": "Hi-Fi高保真音效 (24bit), 360度環繞音訊", "作業系統": "N/A",
-                "建議售價": "NT$7,490 (上市價)"
-            }
+            // --- 舊機型資料 (如果不在 productModels 中，將不會被使用) ---
+            "galaxy s23 ultra": { /* ... */ }, "galaxy s23 fe": { /* ... */ },
+            "galaxy z fold5": { /* ... */ }, "galaxy z flip5": { /* ... */ },
+            "galaxy a55 5g": { /* ... */ }, "galaxy a35 5g": { /* ... */ },
+            "galaxy tab s9 ultra": { /* ... */ }, "galaxy tab s9": { /* ... */ },
+            "galaxy watch6": { /* ... */ }, "galaxy watch6 classic": { /* ... */ },
+            "galaxy buds fe": { /* ... */ }, "galaxy buds2 pro": { /* ... */ }
         };
 
+        // 篩選 fetchedProductSpecs，只保留 productModels 中定義的機型
+        const activeProductModelKeys = productModels.map(model => model.toLowerCase().replace(/\s+/g, ' ').trim());
+        const fetchedProductSpecs = {};
+        for (const key of activeProductModelKeys) {
+            if (allFetchedProductSpecs[key]) {
+                fetchedProductSpecs[key] = allFetchedProductSpecs[key];
+            }
+        }
+
+
         // --- 定義規格類別及相關的規格項目 ---
-        const dataSources = {
-            "processor": {
-                name: "處理器與記憶體",
-                specItems: ["處理器型號", "處理器核心數", "RAM", "儲存空間"],
+        const dataSources = { // 雖然移除了類別選擇，但保留此結構有助於未來可能的擴展或更精細的題目控制
+            "all_specs": { // 我們將使用這個"虛擬"類別來包含所有規格
+                name: "所有規格", // 這個名稱不會顯示給使用者
+                specItems: [], // 將由程式動態填充
                 questionTemplates: [
-                    (model, specName) => `請問 ${model} 的 ${specName} 是 _______。`,
-                    (model, specName) => `${model} 所搭載的 ${specName} 為何？ _______。`
-                ]
-            },
-            "display": {
-                name: "螢幕規格",
-                specItems: ["主螢幕尺寸", "主螢幕解析度", "主螢幕技術", "主螢幕最高更新頻率", "內頁螢幕尺寸", "封面螢幕尺寸"],
-                questionTemplates: [
-                    (model, specName) => `${model} 的 ${specName} 是 _______。`,
-                    (model, specName) => `關於 ${model} 的 ${specName}，其規格為 _______。`
-                ]
-            },
-            "camera": {
-                name: "相機規格",
-                specItems: ["主相機最高畫素", "望遠鏡頭1畫素及光學變焦", "望遠鏡頭2畫素及光學變焦", "超廣角鏡頭畫素", "微距鏡頭畫素", "前鏡頭畫素", "封面螢幕前鏡頭畫素", "前鏡頭超廣角畫素", "錄影最高解析度"],
-                questionTemplates: [
-                    (model, specName) => `${model} 的 ${specName} 為 _______。`,
-                    (model, specName) => `請問 ${model} 在 ${specName} 方面的規格是 _______？`
-                ]
-            },
-            "battery": {
-                name: "電池與充電",
-                specItems: ["電池容量", "有線快速充電瓦數", "無線充電", "單耳續航(ANC開)", "總續航(ANC開)"],
-                questionTemplates: [
-                    (model, specName) => `請問 ${model} 的 ${specName} 是 _______。`,
-                    (model, specName) => `${model} 是否支援 ${specName}？ (請回答支援瓦數/是/否/支援與否/小時數) _______。`
-                ]
-            },
-            "other_features": {
-                name: "其他特色/規格",
-                specItems: ["防水防塵等級", "內建 S Pen", "NFC功能", "作業系統", "健康感測器", "藍牙版本", "特色功能", "錶殼材質"],
-                questionTemplates: [
-                    (model, specName) => `${model} 的 ${specName} 為何？ (請回答等級/是/否/支援與否/版本/材質/詳細內容) _______。`,
-                    (model, specName) => `請問 ${model} 是否具備 ${specName} 功能/規格？ (請回答是/否/支援與否/版本/材質/詳細內容) _______。`
-                ]
-            },
-            "price_info": {
-                name: "價格資訊",
-                specItems: ["建議售價"],
-                questionTemplates: [
-                    (model, specName) => `請問 ${model} 的 ${specName} 大約是多少？ _______。`,
-                    (model, specName) => `${model} 的 ${specName} 為何？ _______。`
+                    (model, specName) => `請問 ${model} 的 ${specName} 是 _______。`
                 ]
             }
         };
 
         // --- DOM 元素 ---
         const modelNameSelect = document.getElementById('modelNameSelect');
-        const dataSourceSelect = document.getElementById('dataSourceSelect');
         const generateButton = document.getElementById('generateButton');
         const quizArea = document.getElementById('quizArea');
         const submitArea = document.getElementById('submitArea');
@@ -454,15 +313,13 @@
                 const aIsZ = a.includes("Galaxy Z");
                 const bIsZ = b.includes("Galaxy Z");
 
-                if (aIsFuture && !bIsFuture) return -1; // 未來機型優先
+                if (aIsFuture && !bIsFuture) return -1;
                 if (!aIsFuture && bIsFuture) return 1;
-
-                if (aIsS && !bIsS) return -1; // S系列優先於非S/Z
+                if (aIsS && !bIsS) return -1;
                 if (!aIsS && bIsS) return 1;
-                if (aIsZ && !bIsZ) return -1; // Z系列優先於非S/Z
+                if (aIsZ && !bIsZ) return -1;
                 if (!aIsZ && bIsZ) return 1;
-                
-                return a.localeCompare(b); // 其他按字母
+                return a.localeCompare(b);
             });
 
             productModels.forEach(model => {
@@ -477,36 +334,21 @@
                 modelNameSelect.value = defaultModel.toLowerCase().replace(/\s+/g, ' ').trim();
             }
 
-
-            for (const key in dataSources) {
-                const option = document.createElement('option');
-                option.value = key;
-                option.textContent = dataSources[key].name;
-                dataSourceSelect.appendChild(option);
-            }
-
-            generateButton.addEventListener('click', generateQuestionsHandlerWrapper); // 使用包裝器
-            generateButton.setAttribute('data-listener-set', 'true'); // 初始設定監聽器標記
+            generateButton.addEventListener('click', generateQuestionsHandlerWrapper);
+            generateButton.setAttribute('data-listener-set', 'true');
             submitButton.addEventListener('click', handleSubmit);
         }
         
-        function generateQuestionsHandlerWrapper() { // 包裝器函數
+        function generateQuestionsHandlerWrapper() {
             generateQuestions();
         }
 
-        // --- 考題產生邏輯 ---
+        // --- 考題產生邏輯 (已修改) ---
         function generateQuestions() {
             const selectedModelKey = modelNameSelect.value;
-            const selectedDataSourceKey = dataSourceSelect.value;
             const modelDisplayName = modelNameSelect.options[modelNameSelect.selectedIndex].text;
 
-            const category = dataSources[selectedDataSourceKey];
-            if (!category) {
-                alert('無效的規格類別！');
-                return;
-            }
-
-            const specsForModel = fetchedProductSpecs[selectedModelKey];
+            const specsForModel = fetchedProductSpecs[selectedModelKey]; // 使用篩選後的資料庫
 
             quizArea.innerHTML = '';
             scoreArea.innerHTML = '';
@@ -520,36 +362,38 @@
                 return;
             }
 
-            let availableQuestions = [];
-            for (const specItemName of category.specItems) {
-                if (specsForModel.hasOwnProperty(specItemName) && specsForModel[specItemName] !== undefined && specsForModel[specItemName] !== null && String(specsForModel[specItemName]).trim() !== "") {
-                    const specValue = specsForModel[specItemName];
-                    const templateIndex = Math.floor(Math.random() * category.questionTemplates.length);
-                    const questionText = category.questionTemplates[templateIndex](modelDisplayName, specItemName);
-                    availableQuestions.push({ question: questionText, answer: specValue });
+            let allAvailableSpecItems = [];
+            for (const specItemName in specsForModel) {
+                if (specsForModel.hasOwnProperty(specItemName) && 
+                    specsForModel[specItemName] !== undefined && 
+                    specsForModel[specItemName] !== null && 
+                    String(specsForModel[specItemName]).trim() !== "") {
+                    allAvailableSpecItems.push({ name: specItemName, value: specsForModel[specItemName] });
                 }
             }
 
-            if (availableQuestions.length === 0) {
-                noResultsMessage.innerHTML = `<p>在「${modelDisplayName}」的「${category.name}」類別下，目前找不到可用的規格項目來產生題目。</p>`;
+            if (allAvailableSpecItems.length === 0) {
+                noResultsMessage.innerHTML = `<p>「${modelDisplayName}」目前沒有可用的規格項目來產生題目。</p>`;
                 noResultsMessage.classList.remove('hidden');
                 submitArea.classList.add('hidden');
                 return;
             }
 
-            availableQuestions.sort(() => 0.5 - Math.random());
-            const numQuestionsToGenerate = Math.min(Math.max(5, availableQuestions.length), MAX_QUESTIONS);
-            currentQuizData = availableQuestions.slice(0, numQuestionsToGenerate);
+            allAvailableSpecItems.sort(() => 0.5 - Math.random());
+            const numQuestionsToGenerate = Math.min(Math.max(5, allAvailableSpecItems.length), MAX_QUESTIONS);
+            const selectedSpecsForQuiz = allAvailableSpecItems.slice(0, numQuestionsToGenerate);
 
+            selectedSpecsForQuiz.forEach((specData, index) => {
+                const questionText = `請問 ${modelDisplayName} 的 ${specData.name} 是 _______。`;
+                currentQuizData.push({ question: questionText, answer: specData.value });
 
-            currentQuizData.forEach((qData, index) => {
-                const questionId = `q-${selectedDataSourceKey}-${index}`;
+                const questionId = `q-spec-${index}`;
                 const questionCard = document.createElement('div');
                 questionCard.className = 'question-card';
 
                 const questionP = document.createElement('p');
                 questionP.className = 'text-gray-800 mb-2';
-                questionP.innerHTML = `<strong>題目 ${index + 1}:</strong> ${qData.question.replace('_______', `<span class="font-bold text-blue-600">(填空處)</span>`)}`;
+                questionP.innerHTML = `<strong>題目 ${index + 1}:</strong> ${questionText.replace('_______', `<span class="font-bold text-blue-600">(填空處)</span>`)}`;
                 questionCard.appendChild(questionP);
 
                 const answerInput = document.createElement('input');
@@ -570,15 +414,14 @@
             if (currentQuizData.length > 0) {
                 submitArea.classList.remove('hidden');
                 submitButton.disabled = false;
-                generateButton.textContent = "產生考題"; // 重設按鈕文字
+                generateButton.textContent = "產生考題";
             } else {
-                noResultsMessage.innerHTML = `<p>在「${modelDisplayName}」的「${category.name}」類別下，未能成功產生題目。</p>`;
+                noResultsMessage.innerHTML = `<p>在「${modelDisplayName}」中未能成功產生題目。</p>`;
                 noResultsMessage.classList.remove('hidden');
                 submitArea.classList.add('hidden');
             }
         }
         
-
         // --- 提交答案與計分邏輯 ---
         function handleSubmit() {
             let score = 0;
@@ -613,13 +456,11 @@
             submitButton.disabled = true;
             generateButton.textContent = "重新產生考題";
             
-            // 移除舊的 generateButton 監聽器 (如果它是 handleSubmit 臨時添加的那個)
             const currentOnClick = generateButton.onclick;
-            if (currentOnClick && currentOnClick.name === "newGenerateButtonHandler") { // 假設臨時處理函數叫這個名字
+            if (currentOnClick && currentOnClick.name === "newGenerateButtonHandler") { 
                  generateButton.removeEventListener('click', currentOnClick);
             }
             
-            // 添加一個新的臨時監聽器，用於 "重新產生考題"
             const newGenerateButtonHandler = () => {
                 submitButton.disabled = false;
                 generateButton.textContent = "產生考題";
@@ -627,16 +468,14 @@
                 scoreArea.innerHTML = '';
                 submitArea.classList.add('hidden');
                 noResultsMessage.classList.add('hidden');
-                generateButton.removeEventListener('click', newGenerateButtonHandler); // 移除自身
+                generateButton.removeEventListener('click', newGenerateButtonHandler); 
                 
-                // 重新綁定主要的 generateQuestions 監聽器
                 if (!generateButton.hasAttribute('data-listener-set')) {
                      generateButton.addEventListener('click', generateQuestionsHandlerWrapper);
                      generateButton.setAttribute('data-listener-set', 'true');
                 }
-                generateQuestions(); // 呼叫產生新題目
+                generateQuestions();
             };
-            // 移除主監聽器，添加臨時的
             generateButton.removeEventListener('click', generateQuestionsHandlerWrapper); 
             generateButton.removeAttribute('data-listener-set'); 
             generateButton.addEventListener('click', newGenerateButtonHandler);
